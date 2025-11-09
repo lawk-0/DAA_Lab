@@ -1,42 +1,81 @@
 #include <stdio.h>
+#include <stdlib.h>
 
+// Function to exchange two integers
 void EXCHANGE(int *p, int *q) {
     int temp = *p;
     *p = *q;
     *q = temp;
 }
 
+// Function to rotate first p2 elements of array right by one position
 void ROTATE_RIGHT(int *p1, int p2) {
-    int i;
-    for (i = p2 - 1; i > 0; i--) {
+    int temp = p1[p2 - 1];  // store last element among first p2
+    for (int i = p2 - 1; i > 0; i--) {
         EXCHANGE(&p1[i], &p1[i - 1]);
     }
+    p1[0] = temp;
 }
 
 int main() {
-    int A[100], N, i, p2;
+    FILE *inputFile, *outputFile;
+    int n;
 
-    printf("Enter size of array (N): ");
-    scanf("%d", &N);
-
-    printf("Enter %d elements: ", N);
-    for (i = 0; i < N; i++) {
-        scanf("%d", &A[i]);
+    // Open input file
+    inputFile = fopen("input.txt", "r");
+    if (inputFile == NULL) {
+        printf("Error: Could not open input file.\n");
+        return 1;
     }
 
-    printf("Enter number of elements to rotate from start (p2): ");
-    scanf("%d", &p2);
-    printf("Before ROTATE: ");
-    for (i = 0; i < N; i++) {
-        printf("%d ", A[i]);
+    // Read size of array
+    fscanf(inputFile, "%d", &n);
+    if (n <= 0) {
+        printf("Invalid array size.\n");
+        fclose(inputFile);
+        return 1;
     }
-    printf("\n");
-    ROTATE_RIGHT(A, p2);
 
-    printf("After ROTATE: ");
-    for (i = 0; i < N; i++) {
-        printf("%d ", A[i]);
+    int *A = (int *)malloc(n * sizeof(int));
+    if (A == NULL) {
+        printf("Memory allocation failed.\n");
+        fclose(inputFile);
+        return 1;
     }
-    printf("\n");
+
+    // Read array elements
+    for (int i = 0; i < n; i++) {
+        fscanf(inputFile, "%d", &A[i]);
+    }
+
+    fclose(inputFile);
+
+    // Open output file
+    outputFile = fopen("output.txt", "w");
+    if (outputFile == NULL) {
+        printf("Error: Could not open output file.\n");
+        free(A);
+        return 1;
+    }
+
+    // Print before rotation
+    fprintf(outputFile, "Before ROTATE: ");
+    for (int i = 0; i < n; i++)
+        fprintf(outputFile, "%d ", A[i]);
+    fprintf(outputFile, "\n");
+
+    // Call ROTATE_RIGHT for first 5 elements
+    ROTATE_RIGHT(A, 5);
+
+    // Print after rotation
+    fprintf(outputFile, "After  ROTATE: ");
+    for (int i = 0; i < n; i++)
+        fprintf(outputFile, "%d ", A[i]);
+    fprintf(outputFile, "\n");
+
+    fclose(outputFile);
+    free(A);
+
+    printf("Results written to output.txt successfully.\n");
     return 0;
 }

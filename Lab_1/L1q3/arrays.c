@@ -1,75 +1,88 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX 1000
-
 int main() {
-    int n, i, j, count = 0;
-    int arr[MAX], freq[MAX] = {0};
-    char filename[100];
-    FILE *fp;
+    FILE *inputFile, *outputFile;
+    int n, count = 0;
 
-    printf("Enter the filename to read integers from: ");
-    scanf("%s", filename);
-
-    fp = fopen(filename, "r");
-    if (fp == NULL) {
-        printf("Error opening file.\n");
+    // Open input file
+    inputFile = fopen("input.txt", "r");
+    if (inputFile == NULL) {
+        printf("Error: Could not open input file.\n");
         return 1;
     }
 
-    printf("Enter how many numbers you want to read from file: ");
-    scanf("%d", &n);
+    // Read how many numbers to read
+    fscanf(inputFile, "%d", &n);
+    if (n <= 0) {
+        printf("Invalid size of array.\n");
+        fclose(inputFile);
+        return 1;
+    }
 
-    for (i = 0; i < n; i++) {
-        if (fscanf(fp, "%d", &arr[i]) != 1) {
-            printf("Error reading integer from file.\n");
-            fclose(fp);
+    // Allocate memory
+    int *arr = (int *)malloc(n * sizeof(int));
+    if (arr == NULL) {
+        printf("Memory allocation failed.\n");
+        fclose(inputFile);
+        return 1;
+    }
+
+    // Read numbers into array
+    for (int i = 0; i < n; i++) {
+        if (fscanf(inputFile, "%d", &arr[i]) != 1) {
+            printf("Error reading number %d from file.\n", i + 1);
+            free(arr);
+            fclose(inputFile);
             return 1;
         }
     }
 
-    fclose(fp);
+    fclose(inputFile);
 
-    // Display array
-    printf("The content of the array: ");
-    for (i = 0; i < n; i++) {
-        printf("%d ", arr[i]);
+    // Open output file
+    outputFile = fopen("output.txt", "w");
+    if (outputFile == NULL) {
+        printf("Error: Could not open output file.\n");
+        free(arr);
+        return 1;
     }
-    printf("\n");
 
-    // Count frequency
-    for (i = 0; i < n; i++) {
-        int isDuplicate = 0;
-        for (j = i + 1; j < n; j++) {
+    // Display array contents
+    fprintf(outputFile, "The content of the array: ");
+    for (int i = 0; i < n; i++) {
+        fprintf(outputFile, "%d ", arr[i]);
+    }
+    fprintf(outputFile, "\n");
+
+    // Count duplicates and find most repeating element
+    int duplicateCount = 0, maxCount = 0, mostRepeating = arr[0];
+
+    for (int i = 0; i < n; i++) {
+        int freq = 1;
+        if (arr[i] == -99999)  // Skip already counted duplicates
+            continue;
+        for (int j = i + 1; j < n; j++) {
             if (arr[i] == arr[j]) {
-                freq[i]++;
-                isDuplicate = 1;
+                freq++;
+                arr[j] = -99999;  // Mark as counted
             }
         }
-        if (isDuplicate) {
-            count++;
+        if (freq > 1)
+            duplicateCount++;
+
+        if (freq > maxCount) {
+            maxCount = freq;
+            mostRepeating = arr[i];
         }
     }
 
-    printf("Total number of duplicate values = %d\n", count);
+    fprintf(outputFile, "Total number of duplicate values = %d\n", duplicateCount);
+    fprintf(outputFile, "The most repeating element in the array = %d\n", mostRepeating);
 
-    // Find most frequent element
-    int maxFreq = 0, mostRepeated;
-    for (i = 0; i < n; i++) {
-        int tempFreq = 1;
-        for (j = i + 1; j < n; j++) {
-            if (arr[i] == arr[j]) {
-                tempFreq++;
-            }
-        }
-        if (tempFreq > maxFreq) {
-            maxFreq = tempFreq;
-            mostRepeated = arr[i];
-        }
-    }
+    fclose(outputFile);
+    free(arr);
 
-    printf("The most repeating element in the array = %d\n", mostRepeated);
-
+    printf("Results written to output.txt successfully.\n");
     return 0;
 }

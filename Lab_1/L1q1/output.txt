@@ -1,0 +1,2 @@
+Second Smallest Element: 3
+Second Largest Element: 19
